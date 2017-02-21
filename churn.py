@@ -33,19 +33,33 @@ if __name__ == '__main__':
     cols = [u'avg_dist', u'avg_rating_by_driver', u'avg_rating_of_driver',
        u'surge_pct',
        u'trips_in_first_30_days', u'luxury_car_user', u'weekday_pct', u'city_Astapor', u"city_King's Landing",
-       u'phone_Android']
+       u'phone_Android',u'churned']
 
+    #re-added in 'churned' column for comparison_test, but drop it in line 45 and 46
     y = df['churned']
     X = df[cols]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y)
-
+    #added comparison_test to check our predictions vs actual churned
+    comparison_test = X_test.copy()
+    X_train.drop('churned',axis = 1,inplace=True)
+    X_test.drop('churned',axis = 1, inplace=True)
+    cols.remove('churned')
     rand_forest = GradientBoostingClassifier()
     rand_forest.fit(X_train, y_train)
-    print rand_forest.oob_score_
     print rand_forest.score(X_test, y_test)
     for i in range(len(cols)):
         print cols[i], rand_forest.feature_importances_[i]
+
+    #churn_prediction is the result/predicted churn using our model
+    comparison_test['churn_prediction'] = rand_forest.predict(X_test)
+    #correct_prediction returns True for correct prediction compared to actual churn
+    comparison_test['correct_prediction']= comparison_test['churned']==comparison_test['churn_prediction']
+
+    #Created two DFs to access the correct and false predictions easily
+    correct_predict = comparison_test[comparison_test['correct_prediction']==True]
+    false_predict = comparison_test[comparison_test['correct_prediction']==False]
+
 
     # log_model = LogisticRegressionCV()
     # log_model.fit(X_train, y_train)
