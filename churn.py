@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import datetime as dt
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix, precision_score, recall_score
 from sklearn.linear_model import LogisticRegressionCV
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 
@@ -30,26 +31,37 @@ if __name__ == '__main__':
     df = missing_data(df)
     df = data_wrangling(df)
 
+    df_test = pd.read_csv('data/churn_test.csv')
+    df_test = missing_data(df_test)
+    df_test = data_wrangling(df_test)
+
     cols = [u'avg_dist', u'avg_rating_by_driver', u'avg_rating_of_driver',
        u'surge_pct',
        u'trips_in_first_30_days', u'luxury_car_user', u'weekday_pct', u'city_Astapor', u"city_King's Landing",
-       u'phone_Android',u'churned']
+       u'phone_Android']
 
     #re-added in 'churned' column for comparison_test, but drop it in line 45 and 46
     y = df['churned']
     X = df[cols]
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y)
+    y_test = df_test['churned']
+    X_test = df_test[cols]
+
+    # X_train, X_test, y_train, y_test = train_test_split(X, y)
     #added comparison_test to check our predictions vs actual churned
-    comparison_test = X_test.copy()
-    X_train.drop('churned',axis = 1,inplace=True)
-    X_test.drop('churned',axis = 1, inplace=True)
-    cols.remove('churned')
-    rand_forest = GradientBoostingClassifier()
-    rand_forest.fit(X_train, y_train)
-    print rand_forest.score(X_test, y_test)
-    for i in range(len(cols)):
-        print cols[i], rand_forest.feature_importances_[i]
+    # comparison_test = X_test.copy()
+    # X_train.drop('churned',axis = 1,inplace=True)
+    # X_test.drop('churned',axis = 1, inplace=True)
+    # cols.remove('churned')
+    grad = GradientBoostingClassifier()
+    grad.fit(X, y)
+    print grad.score(X_test, y_test)
+    print confusion_matrix(y_test, grad.predict(X_test))
+
+    '''
+    # print rand_forest.score(X_test, y_test)
+    # for i in range(len(cols)):
+    #     print cols[i], rand_forest.feature_importances_[i]
 
     #churn_prediction is the result/predicted churn using our model
     comparison_test['churn_prediction'] = rand_forest.predict(X_test)
@@ -66,3 +78,4 @@ if __name__ == '__main__':
     # print log_model.score(X_test, y_test)
     # for i in range(len(cols)):
     #     print cols[i], log_model.coef_[0][i]
+    '''
