@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import datetime as dt
 from sklearn.model_selection import train_test_split
@@ -38,7 +39,7 @@ if __name__ == '__main__':
     cols = [u'avg_dist', u'avg_rating_by_driver', u'avg_rating_of_driver',
        u'surge_pct',
        u'trips_in_first_30_days', u'luxury_car_user', u'weekday_pct', u'city_Astapor', u"city_King's Landing",
-       u'phone_Android']
+       u'phone_Android',u'churned']
 
     #re-added in 'churned' column for comparison_test, but drop it in line 45 and 46
     y = df['churned']
@@ -47,24 +48,22 @@ if __name__ == '__main__':
     y_test = df_test['churned']
     X_test = df_test[cols]
 
-    # X_train, X_test, y_train, y_test = train_test_split(X, y)
     #added comparison_test to check our predictions vs actual churned
-    # comparison_test = X_test.copy()
-    # X_train.drop('churned',axis = 1,inplace=True)
-    # X_test.drop('churned',axis = 1, inplace=True)
-    # cols.remove('churned')
+    comparison_test = X_test.copy()
+    X.drop('churned',axis = 1,inplace=True)
+    X_test.drop('churned',axis = 1, inplace=True)
+    cols.remove('churned')
     grad = GradientBoostingClassifier()
     grad.fit(X, y)
     print grad.score(X_test, y_test)
     print confusion_matrix(y_test, grad.predict(X_test))
 
-    '''
-    # print rand_forest.score(X_test, y_test)
-    # for i in range(len(cols)):
-    #     print cols[i], rand_forest.feature_importances_[i]
+
+    for i in range(len(cols)):
+         print cols[i], grad.feature_importances_[i]
 
     #churn_prediction is the result/predicted churn using our model
-    comparison_test['churn_prediction'] = rand_forest.predict(X_test)
+    comparison_test['churn_prediction'] = grad.predict(X_test)
     #correct_prediction returns True for correct prediction compared to actual churn
     comparison_test['correct_prediction']= comparison_test['churned']==comparison_test['churn_prediction']
 
@@ -72,7 +71,11 @@ if __name__ == '__main__':
     correct_predict = comparison_test[comparison_test['correct_prediction']==True]
     false_predict = comparison_test[comparison_test['correct_prediction']==False]
 
-
+    # correct_predict.hist(figsize=(10,10), bins=25)
+    # false_predict.hist(figsize=(10,10), bins=25)
+    # plt.show()
+    
+    '''
     # log_model = LogisticRegressionCV()
     # log_model.fit(X_train, y_train)
     # print log_model.score(X_test, y_test)
